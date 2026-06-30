@@ -84,3 +84,35 @@ Perlu upload ulang jika:
 - mengganti struktur HTML,
 - mengubah `site-config.js`,
 - menambahkan gambar lokal baru ke folder `assets`.
+
+## Bagian yang Membuat Website Dinamis
+
+Bagian dinamisnya ada di tiga tempat:
+
+- `site-config.js` menyimpan URL CSV Google Sheets.
+- `script.js` mengambil data dari URL CSV tersebut, membaca kolom `section`, lalu mengganti isi HTML.
+- elemen di `index.html` yang punya atribut `data-render` dan `data-field` menjadi tempat data spreadsheet ditampilkan.
+
+Contoh:
+
+```html
+<div class="project-list" data-render="projects"></div>
+```
+
+Bagian itu akan diisi otomatis dari baris spreadsheet dengan `section` bernilai `project`.
+
+## Cara Kerja Kolom Visible
+
+Kolom `visible` dipakai untuk mengatur tampil/sembunyi:
+
+- `TRUE` atau kosong: tampil.
+- `FALSE`: sembunyi.
+
+Jika semua data pada satu section dibuat `FALSE`, section tersebut akan disembunyikan dari halaman dan menu navigasi.
+
+Jika `FALSE` tidak berpengaruh di website live, biasanya penyebabnya salah satu dari ini:
+
+- `site-config.js` belum memakai URL CSV Google Sheets yang benar.
+- Google Sheets belum dipublish ulang sebagai CSV.
+- file terbaru belum diupload ke GitHub.
+- browser masih memegang cache lama, coba hard refresh.
