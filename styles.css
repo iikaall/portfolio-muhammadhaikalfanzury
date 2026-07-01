@@ -31,10 +31,10 @@
   --hero-photo-scale: 1;
   --hero-photo-bg-width: 82%;
   --hero-photo-bg-right: 5%;
-  --hero-photo-bg-bottom: 8%;
+  --hero-photo-bg-bottom: 6%;
   --hero-photo-bg-color-1: var(--yellow);
   --hero-photo-bg-color-2: var(--teal);
-  --hero-photo-bg-shadow: 18px 18px 0 var(--coral);
+  --hero-photo-bg-shadow: 18px 25px 0 var(--coral);
   --brand-photo-y: 18%;
   --brand-photo-scale: 1.35;
   --hero-mobile-padding-top: 48px;
@@ -346,6 +346,7 @@ textarea {
   z-index: 1;
   max-height: var(--hero-photo-max-height);
   object-fit: contain;
+  transform-origin: center bottom;
   transform: translateY(var(--hero-photo-y)) scale(var(--hero-photo-scale));
 }
 
@@ -512,9 +513,105 @@ textarea {
   color: var(--muted);
 }
 
+.project-description {
+  overflow: hidden;
+}
+
+.project-card:not(.expanded) .project-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.project-card.expanded .project-content {
+  justify-content: flex-start;
+}
+
+.project-extra {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.project-extra[hidden] {
+  display: none;
+}
+
+.project-toggle {
+  align-self: flex-start;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
 .project-link {
   align-self: flex-start;
   margin-top: 20px;
+}
+
+.project-extra .project-link {
+  margin-top: 0;
+}
+
+.project-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.project-gallery-item {
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-strong);
+}
+
+.project-gallery-item figcaption {
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 9px 10px;
+}
+
+.media-frame {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: var(--paper-strong);
+}
+
+.media-frame img,
+.media-frame video,
+.media-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+}
+
+.media-link {
+  display: grid;
+  height: 100%;
+  min-height: 180px;
+  place-items: center;
+  background: var(--ink);
+  color: var(--white);
+  font-weight: 800;
+  text-align: center;
+}
+
+.media-link img {
+  grid-area: 1 / 1;
+  opacity: 0.55;
+}
+
+.media-link::after {
+  content: "Putar video";
+  grid-area: 1 / 1;
+  border: 2px solid var(--white);
+  border-radius: var(--radius);
+  padding: 9px 12px;
 }
 
 .project-placeholder {
@@ -731,6 +828,15 @@ textarea {
   transition: transform 300ms ease;
 }
 
+.gallery-item .media-frame {
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.gallery-item .media-link {
+  min-height: 100%;
+}
+
 .gallery-item:hover img {
   transform: scale(1.04);
 }
@@ -938,6 +1044,10 @@ textarea {
     grid-column: auto;
     grid-row: auto;
     min-height: 230px;
+  }
+
+  .project-gallery {
+    grid-template-columns: 1fr;
   }
 
   .section {

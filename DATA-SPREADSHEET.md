@@ -7,7 +7,7 @@ Website ini membaca satu CSV publik dari Google Sheets. Semua baris data memakai
 - `section` - jenis data, misalnya `work`, `project`, `skill`, atau `certification`.
 - `order` - urutan tampil, angka kecil muncul lebih dulu.
 - `visible` - isi `TRUE` untuk tampil, `FALSE` untuk disembunyikan.
-- `key` - dipakai untuk beberapa section, misalnya nama setting, grup skill, jenis kontak, atau ukuran galeri.
+- `key` - dipakai untuk beberapa section, misalnya nama setting, grup skill, jenis kontak, kode proyek, atau ukuran galeri.
 - `title` - judul utama data.
 - `subtitle` - keterangan pendek, misalnya nama perusahaan atau kategori proyek.
 - `period` - periode waktu, misalnya `2021 - Sekarang`.
@@ -40,6 +40,7 @@ description: Mengelola absensi guru, pengajuan fee, dashboard reporting, dan sis
 
 ```text
 section: project
+key: sistem-input-laporan
 title: Sistem Input Laporan Guru
 subtitle: Akademik Alif Iqra
 description: Web app berbasis Apps Script untuk input laporan guru dan export PDF.
@@ -48,6 +49,27 @@ tags: Google Apps Script|Google Sheets|HTML/CSS|PDF Automation
 image: assets/student-report.jpeg
 featured: TRUE
 ```
+
+Kartu proyek akan tampil ringkas lebih dulu. Saat diklik, kartu akan membuka detail lengkap seperti `description`, `bullets`, `tags`, tombol `link_url`, dan media terkait.
+
+### Galeri atau Video Terkait Proyek
+
+Gunakan `section: project_media`. Isi `key` dengan kode yang sama seperti proyeknya.
+
+```text
+section: project_media
+key: sistem-input-laporan
+title: Video demo laporan
+subtitle: video
+description: Video singkat cara kerja sistem.
+image: assets/student-report.jpeg
+alt: Thumbnail video laporan
+link_label: Lihat video
+link_url: https://www.youtube.com/watch?v=VIDEO_ID
+size: wide
+```
+
+Untuk gambar terkait proyek, isi `subtitle: image`, lalu isi kolom `image`.
 
 ### Skill
 
@@ -74,6 +96,34 @@ description: Ringkasan singkat sertifikasi.
 tags: Certificate|Data
 link_label: Lihat sertifikat
 link_url: https://example.com
+```
+
+### Instagram
+
+Tambahkan baris kontak seperti ini:
+
+```text
+section: contact
+key: instagram
+title: Instagram
+value: @username_instagram
+```
+
+Kalau `link_url` dikosongkan, website otomatis membuat link Instagram dari `value`.
+
+### Video di Galeri
+
+Gunakan `section: gallery`, isi `subtitle: video`, lalu taruh URL YouTube/Vimeo/video di `link_url`.
+
+```text
+section: gallery
+key: video
+title: Video Profil
+subtitle: video
+image: assets/talent-qori.jpg
+link_label: Lihat video
+link_url: https://www.youtube.com/watch?v=VIDEO_ID
+size: wide
 ```
 
 ## Kapan Perlu Upload Ulang ke GitHub

@@ -17,7 +17,7 @@ Jika belum ada barisnya, tambahkan baris baru:
 section: setting
 visible: TRUE
 key: style_hero_photo_y
-value: -24px
+value: 0px
 ```
 
 ## Pengaturan Paling Sering Dipakai
@@ -39,8 +39,8 @@ value: -24px
 
 | Key | Efek | Contoh nilai |
 | --- | --- | --- |
-| `style_hero_photo_y` | Naik/turun foto utama. Nilai negatif naik. | `-24px` |
-| `style_hero_photo_scale` | Membesarkan/mengecilkan foto utama | `1.05` |
+| `style_hero_photo_y` | Naik/turun foto utama. Nilai negatif naik. | `0px` |
+| `style_hero_photo_scale` | Membesarkan/mengecilkan foto utama dari bagian bawah | `1` |
 | `style_hero_photo_width` | Lebar area foto di desktop | `360px` |
 | `style_hero_photo_min_height` | Tinggi area foto desktop | `410px` |
 | `style_hero_photo_max_height` | Tinggi maksimal foto desktop | `455px` |
@@ -50,10 +50,11 @@ value: -24px
 
 Rekomendasi aman:
 
-- Foto ingin naik sedikit: `style_hero_photo_y = -16px`
-- Foto ingin turun sedikit: `style_hero_photo_y = 16px`
-- Foto ingin sedikit lebih besar: `style_hero_photo_scale = 1.05`
-- Foto ingin sedikit lebih kecil: `style_hero_photo_scale = 0.95`
+- Bawah foto rata dengan area merah: `style_hero_photo_y = 0px`
+- Foto ingin naik sedikit: `style_hero_photo_y = -8px`
+- Foto ingin turun sedikit: `style_hero_photo_y = 8px`
+- Foto ingin sedikit lebih besar: `style_hero_photo_scale = 1.03`
+- Foto ingin sedikit lebih kecil: `style_hero_photo_scale = 0.97`
 
 ## Mengatur Background Foto Hero
 
@@ -61,17 +62,19 @@ Rekomendasi aman:
 | --- | --- | --- |
 | `style_hero_photo_bg_width` | Ukuran kotak background foto | `82%` |
 | `style_hero_photo_bg_right` | Posisi kotak dari kanan | `5%` |
-| `style_hero_photo_bg_bottom` | Posisi kotak dari bawah | `8%` |
+| `style_hero_photo_bg_bottom` | Posisi kotak dari bawah | `6%` |
 | `style_hero_photo_bg_color_1` | Warna segitiga/kotak pertama | `#f5b942` |
 | `style_hero_photo_bg_color_2` | Warna kotak kedua | `#0f8b8d` |
-| `style_hero_photo_bg_shadow` | Bayangan kotak foto | `18px 18px 0 #e85d5d` |
+| `style_hero_photo_bg_shadow` | Bayangan kotak foto | `18px 25px 0 #e85d5d` |
 
 Contoh agar background lebih pas dengan foto:
 
 ```text
-style_hero_photo_bg_width = 76%
-style_hero_photo_bg_bottom = 12%
-style_hero_photo_y = -20px
+style_hero_photo_y = 0px
+style_hero_photo_scale = 1
+style_hero_photo_bg_width = 82%
+style_hero_photo_bg_bottom = 6%
+style_hero_photo_bg_shadow = 18px 25px 0 #e85d5d
 ```
 
 ## Mengatur Hero dan Judul

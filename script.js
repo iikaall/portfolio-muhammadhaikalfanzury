@@ -67,6 +67,7 @@ const fallbackData = {
   ],
   projects: [
     {
+      key: "sistem-absensi",
       tag: "HRD Alif Iqra",
       title: "Sistem Absensi Guru",
       description:
@@ -82,6 +83,7 @@ const fallbackData = {
       featured: true
     },
     {
+      key: "dashboard-reporting",
       tag: "Monthly Report",
       title: "Dashboard Reporting Otomatis",
       description:
@@ -93,6 +95,7 @@ const fallbackData = {
       featured: false
     },
     {
+      key: "student-learning-progress",
       tag: "Akademik Alif Iqra",
       title: "Student Learning Progress",
       description:
@@ -232,6 +235,12 @@ const normalizeSection = (value) => {
     portfolio_projek: "project",
     portofolio_project: "project",
     portofolio_projek: "project",
+    project_media: "projectMedia",
+    project_gallery: "projectMedia",
+    media_project: "projectMedia",
+    media_projek: "projectMedia",
+    galeri_project: "projectMedia",
+    galeri_projek: "projectMedia",
     project_history: "projectHistory",
     histori_project: "projectHistory",
     histori_projek: "projectHistory",
@@ -282,6 +291,99 @@ const createTagRow = (tags) => {
   const row = createEl("div", "tool-row");
   tags.forEach((tag) => row.append(createEl("span", "", tag)));
   return row;
+};
+
+const slugify = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const normalizeMediaType = (value, url = "") => {
+  const combined = `${value || ""} ${url || ""}`.toLowerCase();
+  if (/(youtube|youtu\.be|vimeo|\.mp4|\.webm|\.ogg|video)/.test(combined)) return "video";
+  return "image";
+};
+
+const getYouTubeEmbedUrl = (url) => {
+  const value = String(url || "").trim();
+  const match =
+    value.match(/youtu\.be\/([^?&#]+)/i) ||
+    value.match(/[?&]v=([^?&#]+)/i) ||
+    value.match(/youtube\.com\/shorts\/([^?&#]+)/i) ||
+    value.match(/youtube\.com\/embed\/([^?&#]+)/i);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : "";
+};
+
+const getVimeoEmbedUrl = (url) => {
+  const match = String(url || "").match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+  return match ? `https://player.vimeo.com/video/${match[1]}` : "";
+};
+
+const getVideoEmbedUrl = (url) => getYouTubeEmbedUrl(url) || getVimeoEmbedUrl(url);
+
+const isVideoFile = (url) => /\.(mp4|webm|ogg)(\?|#|$)/i.test(String(url || ""));
+
+const setExternalLink = (link, url) => {
+  link.href = url;
+  if (/^https?:/i.test(url)) {
+    link.target = "_blank";
+    link.rel = "noreferrer";
+  }
+};
+
+const createMediaFigure = (item, className = "media-item") => {
+  const mediaType = normalizeMediaType(item.type || item.subtitle || item.key, item.linkUrl || item.image);
+  const figure = createEl("figure", `${className} ${item.size || ""}`.trim());
+  const frame = createEl("div", `media-frame ${mediaType === "video" ? "video-frame" : ""}`.trim());
+  const title = item.title || item.alt || "Media";
+
+  if (mediaType === "video") {
+    const embedUrl = getVideoEmbedUrl(item.linkUrl);
+
+    if (embedUrl) {
+      const iframe = createEl("iframe");
+      iframe.src = embedUrl;
+      iframe.title = title;
+      iframe.loading = "lazy";
+      iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+      iframe.allowFullscreen = true;
+      frame.append(iframe);
+    } else if (isVideoFile(item.linkUrl)) {
+      const video = createEl("video");
+      video.controls = true;
+      video.preload = "metadata";
+      if (item.image) video.poster = item.image;
+      const source = createEl("source");
+      source.src = item.linkUrl;
+      video.append(source);
+      frame.append(video);
+    } else if (item.linkUrl) {
+      const link = createEl("a", "media-link", item.linkLabel || "Buka video");
+      setExternalLink(link, item.linkUrl);
+      if (item.image) {
+        const image = createEl("img");
+        image.src = item.image;
+        image.alt = item.alt || title;
+        link.prepend(image);
+      }
+      frame.append(link);
+    } else {
+      frame.append(createEl("div", "project-placeholder", title));
+    }
+  } else if (item.image) {
+    const image = createEl("img");
+    image.src = item.image;
+    image.alt = item.alt || title;
+    frame.append(image);
+  } else {
+    frame.append(createEl("div", "project-placeholder", title));
+  }
+
+  figure.append(frame);
+  if (item.title) figure.append(createEl("figcaption", "", item.title));
+  return figure;
 };
 
 const styleSettingMap = {
@@ -389,14 +491,18 @@ const renderStats = (stats) => {
 const renderProjects = (projects) => {
   clearAndAppend(
     '[data-render="projects"]',
-    projects.map((project) => {
+    projects.map((project, index) => {
+      const mediaItems = project.media || [];
+      const bullets = project.bullets || [];
+      const tags = project.tags || [];
       const article = createEl("article", project.featured ? "project-card featured" : "project-card");
       const media = createEl("div", "project-media");
+      const primaryMedia = project.image ? project : mediaItems.find((item) => item.image);
 
-      if (project.image) {
+      if (primaryMedia?.image) {
         const image = createEl("img");
-        image.src = project.image;
-        image.alt = project.alt || project.title || "Gambar proyek";
+        image.src = primaryMedia.image;
+        image.alt = primaryMedia.alt || project.alt || project.title || "Gambar proyek";
         media.append(image);
       } else {
         media.append(createEl("div", "project-placeholder", project.title || "Project"));
@@ -405,24 +511,54 @@ const renderProjects = (projects) => {
       const content = createEl("div", "project-content");
       if (project.tag) content.append(createEl("p", "tag", project.tag));
       content.append(createEl("h3", "", project.title));
-      if (project.description) content.append(createEl("p", "", project.description));
+      if (project.description) content.append(createEl("p", "project-description", project.description));
 
-      if (project.bullets.length) {
+      const extra = createEl("div", "project-extra");
+      extra.hidden = true;
+
+      if (bullets.length) {
         const list = createEl("ul", "check-list");
-        project.bullets.forEach((bullet) => list.append(createEl("li", "", bullet)));
-        content.append(list);
+        bullets.forEach((bullet) => list.append(createEl("li", "", bullet)));
+        extra.append(list);
       }
 
-      if (project.tags.length) content.append(createTagRow(project.tags));
+      if (mediaItems.length) {
+        const gallery = createEl("div", "project-gallery");
+        mediaItems.forEach((item) => gallery.append(createMediaFigure(item, "project-gallery-item")));
+        extra.append(gallery);
+      }
+
+      if (tags.length) extra.append(createTagRow(tags));
 
       if (project.linkUrl) {
         const link = createEl("a", "button ghost project-link", project.linkLabel || "Lihat detail");
-        link.href = project.linkUrl;
-        if (/^https?:/i.test(project.linkUrl)) {
-          link.target = "_blank";
-          link.rel = "noreferrer";
-        }
-        content.append(link);
+        setExternalLink(link, project.linkUrl);
+        extra.append(link);
+      }
+
+      const canExpand =
+        Boolean(project.description) ||
+        bullets.length > 0 ||
+        mediaItems.length > 0 ||
+        tags.length > 0 ||
+        Boolean(project.linkUrl);
+
+      if (canExpand) {
+        const button = createEl("button", "button ghost project-toggle", "Lihat detail");
+        const extraId = `project-detail-${index + 1}`;
+        button.type = "button";
+        button.setAttribute("aria-expanded", "false");
+        button.setAttribute("aria-controls", extraId);
+        extra.id = extraId;
+
+        button.addEventListener("click", () => {
+          const isExpanded = article.classList.toggle("expanded");
+          extra.hidden = !isExpanded;
+          button.textContent = isExpanded ? "Tutup detail" : "Lihat detail";
+          button.setAttribute("aria-expanded", String(isExpanded));
+        });
+
+        content.append(button, extra);
       }
 
       article.append(media, content);
@@ -483,11 +619,7 @@ const renderCertifications = (certifications) => {
 
       if (certification.linkUrl) {
         const link = createEl("a", "button ghost project-link", certification.linkLabel || "Lihat sertifikat");
-        link.href = certification.linkUrl;
-        if (/^https?:/i.test(certification.linkUrl)) {
-          link.target = "_blank";
-          link.rel = "noreferrer";
-        }
+        setExternalLink(link, certification.linkUrl);
         article.append(link);
       }
 
@@ -499,14 +631,7 @@ const renderCertifications = (certifications) => {
 const renderGallery = (gallery) => {
   clearAndAppend(
     '[data-render="gallery"]',
-    gallery.map((item) => {
-      const figure = createEl("figure", `gallery-item ${item.size || ""}`.trim());
-      const image = createEl("img");
-      image.src = item.image;
-      image.alt = item.alt || item.title || "Gambar galeri";
-      figure.append(image, createEl("figcaption", "", item.title));
-      return figure;
-    })
+    gallery.map((item) => createMediaFigure(item, "gallery-item"))
   );
 };
 
@@ -515,6 +640,10 @@ const getContactLink = (contact) => {
   if (contact.key === "email") return `mailto:${contact.value}`;
   if (contact.key === "phone") return `tel:+${normalizePhone(contact.value)}`;
   if (contact.key === "whatsapp") return `https://wa.me/${normalizePhone(contact.value)}`;
+  if (contact.key === "instagram") {
+    const handle = String(contact.value || "").trim().replace(/^@/, "");
+    return handle ? `https://www.instagram.com/${handle}/` : "#contact";
+  }
   return "#contact";
 };
 
@@ -616,6 +745,7 @@ const rowsToPortfolio = (rows) => {
     work: [],
     education: [],
     projects: [],
+    projectMedia: [],
     projectHistory: [],
     skills: { professional: [], additional: [], language: [] },
     certifications: [],
@@ -670,6 +800,7 @@ const rowsToPortfolio = (rows) => {
     if (section === "project") {
       data.projects.push({
         order,
+        key: row.key || slugify(title),
         featured: parseBoolean(row.featured),
         tag: row.subtitle,
         title,
@@ -680,6 +811,21 @@ const rowsToPortfolio = (rows) => {
         alt: row.alt,
         linkLabel: row.link_label,
         linkUrl: row.link_url
+      });
+    }
+
+    if (section === "projectMedia") {
+      data.projectMedia.push({
+        order,
+        projectKey: row.key,
+        type: row.subtitle || row.size,
+        title,
+        description,
+        image: row.image,
+        alt: row.alt,
+        linkLabel: row.link_label,
+        linkUrl: row.link_url,
+        size: row.size
       });
     }
 
@@ -715,10 +861,15 @@ const rowsToPortfolio = (rows) => {
     if (section === "gallery") {
       data.gallery.push({
         order,
+        key: row.key,
+        type: row.subtitle || row.key,
         size: row.size || row.key,
         title,
+        description,
         image: row.image,
-        alt: row.alt
+        alt: row.alt,
+        linkLabel: row.link_label,
+        linkUrl: row.link_url
       });
     }
 
@@ -737,14 +888,27 @@ const rowsToPortfolio = (rows) => {
   data.work = sortByOrder(data.work).filter((item) => item.title);
   data.education = sortByOrder(data.education).filter((item) => item.title);
   data.projects = sortByOrder(data.projects).filter((item) => item.title);
+  data.projectMedia = sortByOrder(data.projectMedia).filter((item) => item.projectKey && (item.image || item.linkUrl));
   data.projectHistory = sortByOrder(data.projectHistory).filter((item) => item.title);
   data.certifications = sortByOrder(data.certifications).filter((item) => item.title);
-  data.gallery = sortByOrder(data.gallery).filter((item) => item.title && item.image);
+  data.gallery = sortByOrder(data.gallery).filter((item) => item.title && (item.image || item.linkUrl));
   data.contacts = sortByOrder(data.contacts).filter((item) => item.title && item.value);
 
   Object.keys(data.skills).forEach((group) => {
     data.skills[group] = sortByOrder(data.skills[group]).map((item) => item.skill);
   });
+
+  const mediaByProject = data.projectMedia.reduce((groups, item) => {
+    const key = slugify(item.projectKey);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(item);
+    return groups;
+  }, {});
+
+  data.projects = data.projects.map((project) => ({
+    ...project,
+    media: mediaByProject[slugify(project.key || project.title)] || []
+  }));
 
   return data;
 };
